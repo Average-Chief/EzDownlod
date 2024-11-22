@@ -1,8 +1,9 @@
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, render_template
 import yt_dlp
-from flask import render_template
+import uuid
 
 app = Flask(__name__)
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -12,7 +13,9 @@ def download_video():
     link = request.json.get('link')
     platform = request.json.get('platform')
 
-    output_file = "/tmp/downloaded_video.mp4"
+    # Generate a unique filename using UUID
+    unique_id = uuid.uuid4().hex
+    output_file = f"/tmp/downloaded_video_{unique_id}.mp4"
 
     ydl_opts = {
         'outtmpl': output_file,
@@ -26,5 +29,3 @@ def download_video():
 
     except Exception as e:
         return {"error": str(e)}, 400
-
-
