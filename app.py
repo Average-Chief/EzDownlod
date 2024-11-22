@@ -12,7 +12,7 @@ def download_video():
     link = request.json.get('link')
     platform = request.json.get('platform')
 
-    output_file = "downloaded_video.mp4"
+    output_file = "/tmp/downloaded_video.mp4"
 
     ydl_opts = {
         'outtmpl': output_file,
