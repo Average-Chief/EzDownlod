@@ -30,14 +30,12 @@
       color: #333;
     }
     .container input, .container select, .container button {
-      display: block;
       width: 100%;
-      box-sizing: border-box;
       padding: 10px;
       margin: 10px 0;
       border: 1px solid #ccc;
       border-radius: 5px;
-  }
+    }
     .container button {
       background-color: #007bff;
       color: white;
@@ -53,11 +51,16 @@
       font-size: 0.9rem;
       margin-top: 10px;
     }
+    .success {
+      color: green;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 style="font-family: 'Courier New', Courier, monospace;">😎 EzDownload</h1>
+    <h1>Video Downloader</h1>
     <form id="downloadForm">
       <input type="url" id="videoLink" placeholder="Paste video link here" required />
       <select id="platform" required>
@@ -67,21 +70,27 @@
         <option value="instagram">Instagram</option>
       </select>
       <button type="submit">Download</button>
+      <p id="successMessage" class="success"></p>
       <p id="errorMessage" class="error"></p>
     </form>
   </div>
 
   <script>
     const form = document.getElementById('downloadForm');
+    const videoLinkInput = document.getElementById('videoLink');
+    const platformSelect = document.getElementById('platform');
     const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
 
+      // Clear previous messages
       errorMessage.textContent = '';
+      successMessage.textContent = '';
 
-      const videoLink = document.getElementById('videoLink').value;
-      const platform = document.getElementById('platform').value;
+      const videoLink = videoLinkInput.value;
+      const platform = platformSelect.value;
 
       if (!videoLink || !platform) {
         errorMessage.textContent = 'Please fill out all fields!';
@@ -101,13 +110,19 @@
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
 
+          // Create an anchor element to download the file
           const a = document.createElement('a');
           a.style.display = 'none';
           a.href = url;
-          a.download = 'video.mp4'; 
+          a.download = 'video.mp4'; // Default filename
           document.body.appendChild(a);
           a.click();
           window.URL.revokeObjectURL(url);
+
+          // Clear input fields and display success message
+          videoLinkInput.value = '';
+          platformSelect.value = '';
+          successMessage.textContent = 'Video downloaded successfully!';
         } else {
           const error = await response.json();
           errorMessage.textContent = error.error || 'Failed to download video!';
