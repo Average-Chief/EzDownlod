@@ -51,16 +51,11 @@
       font-size: 0.9rem;
       margin-top: 10px;
     }
-    .success {
-      color: green;
-      font-size: 0.9rem;
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Video Downloader</h1>
+    <h1>EzDownload</h1>
     <form id="downloadForm">
       <input type="url" id="videoLink" placeholder="Paste video link here" required />
       <select id="platform" required>
@@ -70,7 +65,6 @@
         <option value="instagram">Instagram</option>
       </select>
       <button type="submit">Download</button>
-      <p id="successMessage" class="success"></p>
       <p id="errorMessage" class="error"></p>
     </form>
   </div>
@@ -80,20 +74,16 @@
     const videoLinkInput = document.getElementById('videoLink');
     const platformSelect = document.getElementById('platform');
     const errorMessage = document.getElementById('errorMessage');
-    const successMessage = document.getElementById('successMessage');
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault(); // Prevent form from refreshing the page
+      errorMessage.textContent = ''; // Clear error messages
 
-      // Clear previous messages
-      errorMessage.textContent = '';
-      successMessage.textContent = '';
-
-      const videoLink = videoLinkInput.value;
+      const link = videoLinkInput.value;
       const platform = platformSelect.value;
 
-      if (!videoLink || !platform) {
-        errorMessage.textContent = 'Please fill out all fields!';
+      if (!link || !platform) {
+        errorMessage.textContent = 'Please provide a link and select a platform.';
         return;
       }
 
@@ -103,43 +93,30 @@
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ link: videoLink, platform }),
+          body: JSON.stringify({ link, platform }),
         });
 
         if (response.ok) {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
 
-          // Create an anchor element to download the file
+          // Create an anchor to download the file
           const a = document.createElement('a');
-          a.style.display = 'none';
           a.href = url;
-          a.download = 'video.mp4'; // Default filename
-          document.body.appendChild(a);
+          a.download = 'video.mp4'; // Provide a default filename
           a.click();
-          window.URL.revokeObjectURL(url);
 
-          // Clear input fields and display success message
+          // Clear the input fields after successful download
           videoLinkInput.value = '';
           platformSelect.value = '';
-          successMessage.textContent = 'Video downloaded successfully!';
         } else {
-          const error = await response.json();
-          errorMessage.textContent = error.error || 'Failed to download video!';
+          const errorData = await response.json();
+          errorMessage.textContent = errorData.error || 'An error occurred during download.';
         }
-      } catch (err) {
-        errorMessage.textContent = 'An unexpected error occurred!';
+      } catch (error) {
+        errorMessage.textContent = 'An error occurred: ' + error.message;
       }
     });
-  </script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/static/service-worker.js')
-          .then(reg => console.log('Service Worker registered', reg))
-          .catch(err => console.error('Service Worker not registered', err));
-      });
-    }
   </script>
 </body>
 </html>
