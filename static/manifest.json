@@ -1,6 +1,6 @@
 {
-    "name": "Social Media Video Downloader",
-    "short_name": "Downloader",
+    "name": "EzDownload",
+    "short_name": "Ez",
     "description": "Easily download videos from Twitter, Facebook, and Instagram.",
     "start_url": "/",
     "display": "standalone",
