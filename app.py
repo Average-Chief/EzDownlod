@@ -13,33 +13,18 @@ def download_video():
     link = request.json.get('link')
     platform = request.json.get('platform')
 
-    # Generate a unique ID to avoid conflicts
-    temp_dir = "/tmp"
-    unique_id = str(uuid.uuid4())
-    output_template = f"{temp_dir}/{unique_id}_%(title)s_{platform}_%(id)s.%(ext)s"
+    unique_id = uuid.uuid4().hex
+    output_file = f"/tmp/downloaded_video_{unique_id}.mp4"
 
     ydl_opts = {
-        'outtmpl': output_template,  # Use dynamic naming
+        'outtmpl': output_file,
         'quiet': True,
-        'format': 'bestvideo+bestaudio/best',  # Download best quality available
     }
-
     try:
-        # Download video using yt-dlp
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(link, download=True)
+            ydl.download([link])
 
-        # Find the downloaded file
-        downloaded_file = next(
-            (os.path.join(temp_dir, f) for f in os.listdir(temp_dir) if unique_id in f),
-            None
-        )
-
-        if not downloaded_file:
-            return {"error": "Failed to locate the downloaded file"}, 400
-
-        # Send the file to the user
-        return send_file(downloaded_file, as_attachment=True)
+        return send_file(output_file, as_attachment=True)
 
     except Exception as e:
         return {"error": str(e)}, 400
